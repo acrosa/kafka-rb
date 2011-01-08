@@ -8,6 +8,8 @@ sudo gem install kafka-rb
 require 'kafka-rb'
 
 producer = Kafka::Producer.new
+
 message = Kafka::Message.new("some random message content")
+
 producer.send(message)
 
