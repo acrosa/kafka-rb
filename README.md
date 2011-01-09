@@ -26,8 +26,11 @@ producer.send(message)
 require 'kafka-rb'
 
 producer = Kafka::Producer.new
+
 message1 = Kafka::Message.new("some random message content")
+
 message2 = Kafka::Message.new("some more content")
+
 producer.send([message1, message2])
 
 ### batching a bunch of messages using the block syntax
@@ -35,10 +38,15 @@ producer.send([message1, message2])
 require 'kafka-rb'
 
 producer = Kafka::Producer.new
+
 producer.batch do |messages|
+
   puts "Batching a send of multiple messages.."
+
   messages << Kafka::Message.new("first message to send")
+
   messages << Kafka::Message.new("second message to send")
+
 end
 
 * they will be sent all at once, after the block execution
