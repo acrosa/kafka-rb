@@ -38,5 +38,12 @@ module Kafka
     def send(messages)
       self.write(self.encode_request(self.topic, self.partition, messages))
     end
+
+    def batch(&block)
+      batch = Kafka::Batch.new
+      block.call( batch )
+      self.send(batch.messages)
+      batch.messages.clear
+    end
   end
 end

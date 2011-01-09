@@ -80,4 +80,16 @@ describe Producer do
     message = Kafka::Message.new("ale")
     @producer.send(message).should eql(32)
   end
+
+  describe "Message Batching" do
+    it "should batch messages and send them at once" do
+      message1 = Kafka::Message.new("one")
+      message2 = Kafka::Message.new("two")
+      @producer.should_receive(:send).with([message1, message2]).exactly(:once).and_return(nil)
+      @producer.batch do |messages|
+        messages << message1
+        messages << message2
+      end
+    end
+  end
 end
