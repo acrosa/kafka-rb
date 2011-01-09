@@ -2,7 +2,7 @@
 kafka-rb allows you to produce messages to the Kafka distributed publish/subscribe messaging service.
 
 ## Requirements
-You need to have access to your Kafka instance and be able to connect through TCP. You can obtain a copy and instructions on how to setup kafka at 
+You need to have access to your Kafka instance and be able to connect through TCP. You can obtain a copy and instructions on how to setup kafka at https://github.com/kafka-dev/kafka
 
 ## Installation
 sudo gem install kafka-rb
