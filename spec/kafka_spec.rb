@@ -4,8 +4,4 @@ describe Kafka do
 
   before(:each) do
   end
-
-  describe "default methods" do
-    it "produces messages"
-  end
 end
