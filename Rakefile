@@ -6,7 +6,7 @@ require 'spec/rake/spectask'
 
 GEM = 'kafka-rb'
 GEM_NAME = 'Kafka Client Producer'
-GEM_VERSION = '0.0.1'
+GEM_VERSION = '0.0.2'
 AUTHORS = ['Alejandro Crosa']
 EMAIL = "alejandrocrosa@gmail.com"
 HOMEPAGE = "http://github.com/acrosa/kafka-rb"
