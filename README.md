@@ -13,7 +13,7 @@ sudo gem install kafka-rb
 
 ### Sending a simple message
 
-require 'kafka-rb'
+require 'kafka'
 
 producer = Kafka::Producer.new
 
@@ -23,7 +23,7 @@ producer.send(message)
 
 ### sending a sequence of messages
 
-require 'kafka-rb'
+require 'kafka'
 
 producer = Kafka::Producer.new
 
@@ -35,7 +35,7 @@ producer.send([message1, message2])
 
 ### batching a bunch of messages using the block syntax
 
-require 'kafka-rb'
+require 'kafka'
 
 producer = Kafka::Producer.new
 
