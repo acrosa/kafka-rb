@@ -47,8 +47,10 @@ module Kafka
     end
 
     def loop(&block)
+      messages = []
       while(true) do
-        block.call(self.consume)
+        messages = self.consume
+        block.call(messages) if messages && !messages.empty?
         sleep(self.polling)
       end
     end

@@ -93,7 +93,7 @@ describe Consumer do
     end
 
     it "should loop and execute a block with the consumed messages" do
-      @consumer.stub!(:consume).and_return([])
+      @consumer.stub!(:consume).and_return([mock(Kafka::Message)])
       messages = []
       messages.should_receive(:<<).exactly(:once).and_return([])
       @consumer.loop do |message|
@@ -104,9 +104,9 @@ describe Consumer do
 
     it "should loop (every N seconds, configurable on polling attribute), and execute a block with the consumed messages" do
       @consumer = Consumer.new({ :polling => 1 })
-      @consumer.stub!(:consume).and_return([])
+      @consumer.stub!(:consume).and_return([mock(Kafka::Message)])
       messages = []
-      messages.should_receive(:<<).exactly(:twice).with([]).and_return([])
+      messages.should_receive(:<<).exactly(:twice).and_return([])
       executed_times = 0
       @consumer.loop do |message|
         messages << message

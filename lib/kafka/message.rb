@@ -29,7 +29,7 @@ module Kafka
       magic    = binary[4, 1].unpack("C").shift
       checksum = binary[5, 4].unpack("N").shift
       payload  = binary[9, size] # 5 = 1 + 4 is Magic + Checksum
-      return Message.new(payload, magic, checksum)
+      return Kafka::Message.new(payload, magic, checksum)
     end
   end
 end

@@ -38,11 +38,21 @@ sudo gem install kafka-rb
 
 * they will be sent all at once, after the block execution
 
-### Consuming messages
+### Consuming messages one by one
 
     require 'kafka'
     consumer = Kafka::Consumer.new
     messages = consumer.consume
+
+
+### Consuming messages using a block loop
+
+    require 'kafka'
+    consumer = Kafka::Consumer.new
+    consumer.loop do |messages|
+        puts "Received"
+        puts messages
+    end
 
 
 Contact for questions
