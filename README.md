@@ -40,10 +40,13 @@ sudo gem install kafka-rb
 
 ### Consuming messages
 
-  require 'kafka'
-  consumer = Kafka::Consumer.new
-  messages = consumer.consume
+    require 'kafka'
+    consumer = Kafka::Consumer.new
+    messages = consumer.consume
 
 
 Contact for questions
+
 alejandrocrosa at(@) gmail.com
+
+http://twitter.com/alejandrocrosa
