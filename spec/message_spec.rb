@@ -39,6 +39,17 @@ describe Message do
       @message.valid?.should eql(true)
       @message.checksum = 0
       @message.valid?.should eql(false)
+      @message = Message.new("alejandro", 0, 66666666) # 66666666 is a funny checksum
+      @message.valid?.should eql(false)
+    end
+
+    it "should parse a message from bytes" do
+      bytes = [12].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
+      message = Kafka::Message.parse_from(bytes)
+      message.valid?.should eql(true)
+      message.magic.should eql(0)
+      message.checksum.should eql(1120192889)
+      message.payload.should eql("ale")
     end
   end
 end

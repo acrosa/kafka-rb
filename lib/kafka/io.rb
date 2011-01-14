@@ -26,5 +26,14 @@ module Kafka
       self.reconnect
       self.socket.write(data) # retry
     end
+
+    def read(length)
+      begin
+        self.socket.read(length)
+      rescue Errno::EAGAIN
+        self.disconnect
+        raise Errno::EAGAIN, "Timeout reading from the socket"
+      end
+    end
   end
 end

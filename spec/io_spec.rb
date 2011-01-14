@@ -39,6 +39,19 @@ describe IO do
       @io.write(data).should eql(9)
     end
 
+    it "should read from a socket" do
+      length = 200
+      @mocked_socket.should_receive(:read).with(length).and_return(nil)
+      @io.read(length)
+    end
+
+    it "should disconnect on a timeout when reading from a socket (to aviod protocol desync state)" do
+      length = 200
+      @mocked_socket.should_receive(:read).with(length).and_raise(Errno::EAGAIN)
+      @io.should_receive(:disconnect)
+      lambda { @io.read(length) }.should raise_error(Errno::EAGAIN)
+    end
+
     it "should disconnect" do
       @io.should respond_to(:disconnect)
       @mocked_socket.should_receive(:close).and_return(nil)

@@ -3,15 +3,15 @@ module Kafka
 
     include Kafka::IO
 
-    PRODUCE_REQUEST_ID = 0
+    PRODUCE_REQUEST_ID = Kafka::RequestType::PRODUCE
 
     attr_accessor :topic, :partition
 
     def initialize(options = {})
-      self.topic = options[:topic] || "test"
-      self.partition = options[:partition] || 0
-      self.host = options[:host] || "localhost"
-      self.port = options[:port] || 9092
+      self.topic     = options[:topic]      || "test"
+      self.partition = options[:partition]  || 0
+      self.host      = options[:host]       || "localhost"
+      self.port      = options[:port]       || 9092
       self.connect(self.host, self.port)
     end
 

@@ -5,13 +5,13 @@ require 'date'
 require 'spec/rake/spectask'
 
 GEM = 'kafka-rb'
-GEM_NAME = 'Kafka Client Producer'
-GEM_VERSION = '0.0.2'
+GEM_NAME = 'Kafka Client'
+GEM_VERSION = '0.0.5'
 AUTHORS = ['Alejandro Crosa']
 EMAIL = "alejandrocrosa@gmail.com"
 HOMEPAGE = "http://github.com/acrosa/kafka-rb"
 SUMMARY = "A Ruby client for the Kafka distributed publish/subscribe messaging service"
-DESCRIPTION = "kafka-rb allows you to produce messages to the Kafka distributed publish/subscribe messaging service."
+DESCRIPTION = "kafka-rb allows you to produce and consume messages using the Kafka distributed publish/subscribe messaging service."
 
 spec = Gem::Specification.new do |s|
   s.name = GEM
