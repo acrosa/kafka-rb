@@ -20,6 +20,12 @@ describe Consumer do
       @consumer.should respond_to(:partition)
     end
 
+    it "should have a polling option, and a default value" do
+      Consumer::DEFAULT_POLLING_INTERVAL.should eql(2)
+      @consumer.should respond_to(:polling)
+      @consumer.polling.should eql(2)
+    end
+
     it "should set a topic and partition on initialize" do
       @consumer = Consumer.new({ :host => "localhost", :port => 9092, :topic => "testing" })
       @consumer.topic.should eql("testing")
@@ -84,6 +90,31 @@ describe Consumer do
       @consumer.should_receive(:send_consume_request).and_return(true)
       @consumer.should_receive(:read_data_response).and_return("")
       @consumer.consume.should eql([])
+    end
+
+    it "should loop and execute a block with the consumed messages" do
+      @consumer.stub!(:consume).and_return([])
+      messages = []
+      messages.should_receive(:<<).exactly(:once).and_return([])
+      @consumer.loop do |message|
+        messages << message
+        break # we don't wanna loop forever on the test
+      end
+    end
+
+    it "should loop (every N seconds, configurable on polling attribute), and execute a block with the consumed messages" do
+      @consumer = Consumer.new({ :polling => 1 })
+      @consumer.stub!(:consume).and_return([])
+      messages = []
+      messages.should_receive(:<<).exactly(:twice).with([]).and_return([])
+      executed_times = 0
+      @consumer.loop do |message|
+        messages << message
+        executed_times += 1
+        break if executed_times >= 2 # we don't wanna loop forever on the test, only 2 seconds
+      end
+
+      executed_times.should eql(2)
     end
   end
 end

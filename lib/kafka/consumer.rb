@@ -5,8 +5,9 @@ module Kafka
 
     CONSUME_REQUEST_TYPE = Kafka::RequestType::FETCH
     MAX_SIZE = 1048576 # 1 MB
+    DEFAULT_POLLING_INTERVAL = 2 # 2 seconds
 
-    attr_accessor :topic, :partition, :offset, :max_size, :request_type
+    attr_accessor :topic, :partition, :offset, :max_size, :request_type, :polling
 
     def initialize(options = {})
       self.topic        = options[:topic]        || "test"
@@ -16,6 +17,7 @@ module Kafka
       self.offset       = options[:offset]       || 0
       self.max_size     = options[:max_size]     || MAX_SIZE
       self.request_type = options[:request_type] || CONSUME_REQUEST_TYPE
+      self.polling      = options[:polling]      || DEFAULT_POLLING_INTERVAL
       self.connect(self.host, self.port)
     end
 
@@ -38,11 +40,17 @@ module Kafka
       request_type + topic + partition + offset + max_size
     end
 
-    def consume()
+    def consume
       self.send_consume_request         # request data
       data = self.read_data_response    # read data response
-      puts data.inspect
       self.parse_message_set_from(data) # parse message set
+    end
+
+    def loop(&block)
+      while(true) do
+        block.call(self.consume)
+        sleep(self.polling)
+      end
     end
 
     def read_data_response
