@@ -1,3 +1,4 @@
+# encoding: utf-8
 require File.dirname(__FILE__) + '/spec_helper'
 
 describe Producer do
@@ -43,6 +44,13 @@ describe Producer do
         message = Kafka::Message.new()
         full_message = [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s
         @producer.encode(message).should eql(full_message)
+      end
+
+      it "should encode strings containing non-ASCII characters" do
+        message = Kafka::Message.new("ümlaut")
+        encoded = @producer.encode(message)
+        data = [encoded.size].pack("N") + encoded
+        Kafka::Message.parse_from(data).payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
       end
     end
 
