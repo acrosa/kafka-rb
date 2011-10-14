@@ -16,7 +16,7 @@ module Kafka
     end
 
     def encode(message)
-      [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s
+      [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s.force_encoding(Encoding::ASCII_8BIT)
     end
 
     def encode_request(topic, partition, messages)
