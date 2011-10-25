@@ -71,9 +71,11 @@ module Kafka
       processed = 0
       length = data.length - 4
       while(processed <= length) do
-        message_size = data[processed, 4].unpack("N").shift
-        messages << Kafka::Message.parse_from(data[processed, message_size + 4])
-        processed += 4 + message_size
+        message_size = data[processed, 4].unpack("N").shift + 4
+        message_data = data[processed, message_size]
+        break unless message_data.size == message_size
+        messages << Kafka::Message.parse_from(message_data)
+        processed += message_size
       end
       self.offset += processed
       messages

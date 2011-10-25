@@ -64,7 +64,7 @@ describe Consumer do
     end
 
     it "should read the response data" do
-      bytes = [12].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
+      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
       @mocked_socket.should_receive(:read).exactly(:twice).and_return(bytes)
       @consumer.read_data_response.should eql(bytes[2, bytes.length])
     end
@@ -78,12 +78,36 @@ describe Consumer do
     end
 
     it "should parse a message set from bytes" do
-      bytes = [12].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
+      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
       message = @consumer.parse_message_set_from(bytes).first
       message.payload.should eql("ale")
       message.checksum.should eql(1120192889)
       message.magic.should eql(0)
       message.valid?.should eql(true)
+    end
+
+    it "should skip an incomplete message at the end of the response" do
+      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
+      # incomplete message
+      bytes += [8].pack("N")
+      messages = @consumer.parse_message_set_from(bytes)
+      messages.size.should eql(1)
+    end
+    
+    it "should skip an incomplete message at the end of the response which has the same length as an empty message" do
+      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
+      # incomplete message because payload is missing
+      bytes += [8].pack("N") + [0].pack("C") + [1120192889].pack("N")
+      messages = @consumer.parse_message_set_from(bytes)
+      messages.size.should eql(1)
+    end
+    
+    it "should read empty messages correctly" do
+      # empty message
+      bytes = [5].pack("N") + [0].pack("C") + [0].pack("N") + ""
+      messages = @consumer.parse_message_set_from(bytes)
+      messages.size.should eql(1)
+      messages.first.payload.should eql("")
     end
 
     it "should consume messages" do
