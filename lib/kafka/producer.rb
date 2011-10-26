@@ -16,7 +16,12 @@ module Kafka
     end
 
     def encode(message)
-      [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s.force_encoding(Encoding::ASCII_8BIT)
+      if RUBY_VERSION[0,3] == "1.8"  # Use old iconv on Ruby 1.8 for encoding
+        ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+        [message.magic].pack("C") + [message.calculate_checksum].pack("N") + ic.iconv(message.payload.to_s)
+      else
+        [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s.force_encoding(Encoding::ASCII_8BIT)
+      end
     end
 
     def encode_request(topic, partition, messages)
