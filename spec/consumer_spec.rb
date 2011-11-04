@@ -19,7 +19,7 @@ describe Consumer do
   before(:each) do
     @mocked_socket = mock(TCPSocket)
     TCPSocket.stub!(:new).and_return(@mocked_socket) # don't use a real socket
-    @consumer = Consumer.new
+    @consumer = Consumer.new(:offset => 0)
   end
 
   describe "Kafka Consumer" do
@@ -54,8 +54,9 @@ describe Consumer do
       @consumer.port.should eql(9092)
     end
 
-    it "should have a default offset, and be able to set it" do
-      @consumer.offset.should eql(0)
+    it "should not have a default offset but be able to set it" do
+      @consumer = Consumer.new
+      @consumer.offset.should be_nil
       @consumer = Consumer.new({ :offset => 1111 })
       @consumer.offset.should eql(1111)
     end
@@ -73,7 +74,7 @@ describe Consumer do
     end
 
     it "should encode a request to consume" do
-      bytes = [Kafka::Consumer::CONSUME_REQUEST_TYPE].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [0].pack("L_") + [Kafka::Consumer::MAX_SIZE].pack("N")
+      bytes = [Kafka::Consumer::CONSUME_REQUEST_TYPE].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [0].pack("q").reverse + [Kafka::Consumer::MAX_SIZE].pack("N")
       @consumer.encode_request(Kafka::Consumer::CONSUME_REQUEST_TYPE, "test", 0, 0, Kafka::Consumer::MAX_SIZE).should eql(bytes)
     end
 
@@ -107,7 +108,7 @@ describe Consumer do
       messages = @consumer.parse_message_set_from(bytes)
       messages.size.should eql(1)
     end
-    
+
     it "should skip an incomplete message at the end of the response which has the same length as an empty message" do
       bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
       # incomplete message because payload is missing
@@ -115,7 +116,7 @@ describe Consumer do
       messages = @consumer.parse_message_set_from(bytes)
       messages.size.should eql(1)
     end
-    
+
     it "should read empty messages correctly" do
       # empty message
       bytes = [5].pack("N") + [0].pack("C") + [0].pack("N") + ""
@@ -153,6 +154,27 @@ describe Consumer do
       end
 
       executed_times.should eql(2)
+    end
+
+    it "should fetch initial offset if no offset is given" do
+      @consumer = Consumer.new
+      @consumer.should_receive(:fetch_earliest_offset).exactly(:once).and_return(1000)
+      @consumer.should_receive(:send_consume_request).and_return(true)
+      @consumer.should_receive(:read_data_response).and_return("")
+      @consumer.consume
+      @consumer.offset.should eql(1000)
+    end
+
+    it "should encode an offset request" do
+      bytes = [Kafka::RequestType::OFFSETS].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [-2].pack("q").reverse + [Kafka::Consumer::MAX_OFFSETS].pack("N")
+      @consumer.encode_request(Kafka::RequestType::OFFSETS, "test", 0, -2, Kafka::Consumer::MAX_OFFSETS).should eql(bytes)
+    end
+
+    it "should parse an offsets response" do
+      bytes = [0].pack("n") + [1].pack('N') + [21346].pack('q').reverse
+      @mocked_socket.should_receive(:read).and_return([14].pack("N"))
+      @mocked_socket.should_receive(:read).and_return(bytes)
+      @consumer.read_offsets_response.should eql(21346)
     end
   end
 end

@@ -20,6 +20,8 @@ module Kafka
     CONSUME_REQUEST_TYPE = Kafka::RequestType::FETCH
     MAX_SIZE = 1048576 # 1 MB
     DEFAULT_POLLING_INTERVAL = 2 # 2 seconds
+    MAX_OFFSETS = 1
+    EARLIEST_OFFSET = -2
 
     attr_accessor :topic, :partition, :offset, :max_size, :request_type, :polling
 
@@ -28,7 +30,7 @@ module Kafka
       self.partition    = options[:partition]    || 0
       self.host         = options[:host]         || "localhost"
       self.port         = options[:port]         || 9092
-      self.offset       = options[:offset]       || 0
+      self.offset       = options[:offset]
       self.max_size     = options[:max_size]     || MAX_SIZE
       self.request_type = options[:request_type] || CONSUME_REQUEST_TYPE
       self.polling      = options[:polling]      || DEFAULT_POLLING_INTERVAL
@@ -48,13 +50,14 @@ module Kafka
       request_type = [request_type].pack("n")
       topic        = [topic.length].pack('n') + topic
       partition    = [partition].pack("N")
-      offset       = [offset].pack("Q").reverse # DIY 64bit big endian integer
+      offset       = [offset].pack("q").reverse # DIY 64bit big endian integer
       max_size     = [max_size].pack("N")
 
       request_type + topic + partition + offset + max_size
     end
 
     def consume
+      @offset ||= fetch_earliest_offset
       self.send_consume_request         # request data
       data = self.read_data_response    # read data response
       self.parse_message_set_from(data) # parse message set
@@ -80,6 +83,16 @@ module Kafka
       self.write(self.encode_request(self.request_type, self.topic, self.partition, self.offset, self.max_size)) # write request
     end
 
+    def send_offsets_request
+      self.write(self.encode_request_size) # write request_size
+      self.write(self.encode_request(Kafka::RequestType::OFFSETS, self.topic, self.partition, EARLIEST_OFFSET, MAX_OFFSETS)) # write request
+    end
+
+    def read_offsets_response
+      data = read_data_response
+      data[4,8].reverse.unpack('q')[0]
+    end
+
     def parse_message_set_from(data)
       messages = []
       processed = 0
@@ -93,6 +106,11 @@ module Kafka
       end
       self.offset += processed
       messages
+    end
+    
+    def fetch_earliest_offset
+      self.send_offsets_request
+      self.read_offsets_response
     end
   end
 end
