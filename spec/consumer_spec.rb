@@ -24,8 +24,8 @@ describe Consumer do
 
   describe "Kafka Consumer" do
 
-    it "should have a CONSUME_REQUEST_TYPE" do
-      Consumer::CONSUME_REQUEST_TYPE.should eql(1)
+    it "should have a Kafka::RequestType::FETCH" do
+      Consumer::Kafka::RequestType::FETCH.should eql(1)
       @consumer.should respond_to(:request_type)
     end
 
@@ -67,15 +67,13 @@ describe Consumer do
     end
 
     it "should return the size of the request" do
-      @consumer.request_size.should eql(24)
       @consumer.topic = "someothertopicname"
-      @consumer.request_size.should eql(38)
-      @consumer.encode_request_size.should eql([@consumer.request_size].pack("N"))
+      @consumer.encoded_request_size.should eql([38].pack("N"))
     end
 
     it "should encode a request to consume" do
-      bytes = [Kafka::Consumer::CONSUME_REQUEST_TYPE].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [0].pack("q").reverse + [Kafka::Consumer::MAX_SIZE].pack("N")
-      @consumer.encode_request(Kafka::Consumer::CONSUME_REQUEST_TYPE, "test", 0, 0, Kafka::Consumer::MAX_SIZE).should eql(bytes)
+      bytes = [Kafka::RequestType::FETCH].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [0].pack("q").reverse + [Kafka::Consumer::MAX_SIZE].pack("N")
+      @consumer.encode_request(Kafka::RequestType::FETCH, "test", 0, 0, Kafka::Consumer::MAX_SIZE).should eql(bytes)
     end
 
     it "should read the response data" do
@@ -85,7 +83,7 @@ describe Consumer do
     end
 
     it "should send a consumer request" do
-      @consumer.stub!(:encode_request_size).and_return(666)
+      @consumer.stub!(:encoded_request_size).and_return(666)
       @consumer.stub!(:encode_request).and_return("someencodedrequest")
       @consumer.should_receive(:write).with("someencodedrequest").exactly(:once).and_return(true)
       @consumer.should_receive(:write).with(666).exactly(:once).and_return(true)
