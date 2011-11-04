@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,7 +14,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# encoding: utf-8
 require File.dirname(__FILE__) + '/spec_helper'
 
 describe Producer do
@@ -68,7 +69,7 @@ describe Producer do
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
           ic.iconv(Kafka::Message.parse_from(data).payload).should eql("ümlaut")
         else
-          Kafka::Message.parse_from(data).payload.force_encoding(Encoding::ASCII_8BIT).should eql("ümlaut")
+          Kafka::Message.parse_from(data).payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
         end
       end
     end
