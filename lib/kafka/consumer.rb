@@ -50,6 +50,8 @@ module Kafka
       send_consume_request
       data = read_data_response
       parse_message_set_from(data)
+    rescue SocketError
+      nil
     end
 
     def fetch_earliest_offset
@@ -72,8 +74,8 @@ module Kafka
     end
 
     def read_data_response
-      data_length = socket.read(4).unpack("N").shift
-      data = socket.read(data_length)
+      data_length = read(4).unpack("N").shift
+      data = read(data_length)
       # TODO: inspect error code instead of skipping it
       data[2, data.length]
     end

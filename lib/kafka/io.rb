@@ -24,8 +24,10 @@ module Kafka
     end
 
     def reconnect
+      self.socket = TCPSocket.new(self.host, self.port)
+    rescue
       self.disconnect
-      self.socket = self.connect(self.host, self.port)
+      raise
     end
 
     def disconnect
@@ -33,21 +35,20 @@ module Kafka
       self.socket = nil
     end
 
+    def read(length)
+      self.socket.read(length) || raise(SocketError, "no data")
+    rescue
+      self.disconnect
+      raise SocketError, "cannot read: #{$!.message}"
+    end
+
     def write(data)
       self.reconnect unless self.socket
       self.socket.write(data)
-    rescue Errno::ECONNRESET, Errno::EPIPE, Errno::ECONNABORTED
-      self.reconnect
-      self.socket.write(data) # retry
+    rescue
+      self.disconnect
+      raise SocketError, "cannot write: #{$!.message}"
     end
 
-    def read(length)
-      begin
-        self.socket.read(length)
-      rescue Errno::EAGAIN
-        self.disconnect
-        raise Errno::EAGAIN, "Timeout reading from the socket"
-      end
-    end
   end
 end

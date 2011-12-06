@@ -55,7 +55,7 @@ describe IO do
 
     it "should read from a socket" do
       length = 200
-      @mocked_socket.should_receive(:read).with(length).and_return(nil)
+      @mocked_socket.should_receive(:read).with(length).and_return("foo")
       @io.read(length)
     end
 
@@ -63,7 +63,7 @@ describe IO do
       length = 200
       @mocked_socket.should_receive(:read).with(length).and_raise(Errno::EAGAIN)
       @io.should_receive(:disconnect)
-      lambda { @io.read(length) }.should raise_error(Errno::EAGAIN)
+      lambda { @io.read(length) }.should raise_error(Kafka::SocketError)
     end
 
     it "should disconnect" do
@@ -73,18 +73,15 @@ describe IO do
     end
 
     it "should reconnect" do
-      @mocked_socket.should_receive(:close)
-      @io.should_receive(:connect)
+      TCPSocket.should_receive(:new)
       @io.reconnect
     end
 
-    it "should reconnect on a broken pipe error" do
+    it "should disconnect on a broken pipe error" do
       [Errno::ECONNABORTED, Errno::EPIPE, Errno::ECONNRESET].each do |error|
-        @mocked_socket.should_receive(:write).exactly(:twice).and_raise(error)
+        @mocked_socket.should_receive(:write).exactly(:once).and_raise(error)
         @mocked_socket.should_receive(:close).exactly(:once).and_return(nil)
-        lambda {
-          @io.write("some data to send")
-        }.should raise_error(error)
+        lambda { @io.write("some data to send") }.should raise_error(Kafka::SocketError)
       end
     end
   end

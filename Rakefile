@@ -19,38 +19,34 @@ require 'rubygems/specification'
 require 'date'
 require 'rspec/core/rake_task'
 
-GEM = 'kafka-rb'
-GEM_NAME = 'Kafka Client'
-GEM_VERSION = '0.0.5'
-AUTHORS = ['Alejandro Crosa']
-EMAIL = "alejandrocrosa@gmail.com"
-HOMEPAGE = "http://github.com/acrosa/kafka-rb"
-SUMMARY = "A Ruby client for the Kafka distributed publish/subscribe messaging service"
-DESCRIPTION = "kafka-rb allows you to produce and consume messages using the Kafka distributed publish/subscribe messaging service."
-
 spec = Gem::Specification.new do |s|
-  s.name = GEM
-  s.version = GEM_VERSION
-  s.platform = Gem::Platform::RUBY
-  s.has_rdoc = true
+  s.name = %q{wooga-kafka-rb}
+  s.version = "0.0.7"
+
+  s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
+  s.authors = ["Alejandro Crosa", "Stefan Mees", "Tim Lossen"]
+  s.autorequire = %q{kafka-rb}
+  s.date = Time.now.strftime("%Y-%m-%d")
+  s.description = %q{kafka-rb allows you to produce and consume messages using the Kafka distributed publish/subscribe messaging service.}
   s.extra_rdoc_files = ["LICENSE"]
-  s.summary = SUMMARY
-  s.description = DESCRIPTION
-  s.authors = AUTHORS
-  s.email = EMAIL
-  s.homepage = HOMEPAGE
-  s.add_development_dependency "rspec"
-  s.require_path = 'lib'
-  s.autorequire = GEM
-  s.files = %w(LICENSE README.md Rakefile) + Dir.glob("{lib,tasks,spec}/**/*")
-end
+  s.files = ["LICENSE", "README.md", "Rakefile", "lib/kafka", "lib/kafka/batch.rb", "lib/kafka/consumer.rb", "lib/kafka/io.rb", "lib/kafka/message.rb", "lib/kafka/producer.rb", "lib/kafka/request_type.rb", "lib/kafka/error_codes.rb", "lib/kafka.rb", "spec/batch_spec.rb", "spec/consumer_spec.rb", "spec/io_spec.rb", "spec/kafka_spec.rb", "spec/message_spec.rb", "spec/producer_spec.rb", "spec/spec_helper.rb"]
+  s.homepage = %q{http://github.com/wooga/kafka-rb}
+  s.require_paths = ["lib"]
+  s.rubygems_version = %q{1.3.7}
+  s.summary = %q{A Ruby client for the Kafka distributed publish/subscribe messaging service}
 
-task :default => :spec
+  if s.respond_to? :specification_version then
+    current_version = Gem::Specification::CURRENT_SPECIFICATION_VERSION
+    s.specification_version = 3
 
-desc "Run specs"
-RSpec::Core::RakeTask.new do |t|
-  t.pattern = FileList['spec/**/*_spec.rb']
-  t.rspec_opts = %w(-fs --color)
+    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
+      s.add_development_dependency(%q<rspec>, [">= 0"])
+    else
+      s.add_dependency(%q<rspec>, [">= 0"])
+    end
+  else
+    s.add_dependency(%q<rspec>, [">= 0"])
+  end
 end
 
 Rake::GemPackageTask.new(spec) do |pkg|
@@ -62,15 +58,17 @@ task :install => [:package] do
   sh %{sudo gem install pkg/#{GEM}-#{GEM_VERSION}}
 end
 
-desc "create a gemspec file"
-task :make_spec do
-  File.open("#{GEM}.gemspec", "w") do |file|
-    file.puts spec.to_ruby
-  end
-end
-
 desc "Run all examples with RCov"
 RSpec::Core::RakeTask.new(:rcov) do |t|
   t.pattern = FileList['spec/**/*_spec.rb']
   t.rcov = true
 end
+
+desc "Run specs"
+RSpec::Core::RakeTask.new do |t|
+  t.pattern = FileList['spec/**/*_spec.rb']
+  t.rspec_opts = %w(-fs --color)
+end
+
+task :default => :spec
+
