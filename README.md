@@ -1,13 +1,19 @@
 # kafka-rb
-kafka-rb allows you to produce messages to the Kafka distributed publish/subscribe messaging service.
+kafka-rb allows you to produce and consume messages to / from the Kafka distributed messaging service.
+This is an improved version of the original Ruby client written by Alexandro Crosa, 
+and is used in production at wooga.
 
 ## Requirements
-You need to have access to your Kafka instance and be able to connect through TCP. You can obtain a copy and instructions on how to setup kafka at https://github.com/kafka-dev/kafka
+You need to have access to your Kafka instance and be able to connect through TCP. 
+You can obtain a copy and instructions on how to setup kafka at http://incubator.apache.org/kafka/
+
 
 ## Installation
-sudo gem install kafka-rb
 
-(the code works fine with JRuby, Ruby 1.8x and Ruby 1.9.x)
+    sudo gem install wooga-kafka-rb
+
+(should work fine with JRuby, Ruby 1.8 and 1.9)
+
 
 ## Usage
 
@@ -55,8 +61,5 @@ sudo gem install kafka-rb
     end
 
 
-Contact for questions
-
-alejandrocrosa at(@) gmail.com
-
-http://twitter.com/alejandrocrosa
+## Questions?
+tim.lossen@wooga.net
