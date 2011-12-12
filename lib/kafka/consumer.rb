@@ -21,6 +21,7 @@ module Kafka
     MAX_SIZE = 1024 * 1024        # 1 megabyte
     DEFAULT_POLLING_INTERVAL = 2  # 2 seconds
     MAX_OFFSETS = 1
+    LATEST_OFFSET = -1
     EARLIEST_OFFSET = -2
 
     attr_accessor :topic, :partition, :offset, :max_size, :request_type, :polling
@@ -46,7 +47,7 @@ module Kafka
     end
 
     def consume
-      self.offset ||= fetch_earliest_offset
+      self.offset ||= fetch_latest_offset
       send_consume_request
       data = read_data_response
       parse_message_set_from(data)
@@ -54,14 +55,14 @@ module Kafka
       nil
     end
 
-    def fetch_earliest_offset
+    def fetch_latest_offset
       send_offsets_request
       read_offsets_response
     end
 
     def send_offsets_request
       write(encoded_request_size)
-      write(encode_request(Kafka::RequestType::OFFSETS, topic, partition, EARLIEST_OFFSET, MAX_OFFSETS))
+      write(encode_request(Kafka::RequestType::OFFSETS, topic, partition, LATEST_OFFSET, MAX_OFFSETS))
     end
 
     def read_offsets_response

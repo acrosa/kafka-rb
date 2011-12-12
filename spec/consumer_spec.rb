@@ -157,7 +157,7 @@ describe Consumer do
 
     it "should fetch initial offset if no offset is given" do
       @consumer = Consumer.new
-      @consumer.should_receive(:fetch_earliest_offset).exactly(:once).and_return(1000)
+      @consumer.should_receive(:fetch_latest_offset).exactly(:once).and_return(1000)
       @consumer.should_receive(:send_consume_request).and_return(true)
       @consumer.should_receive(:read_data_response).and_return("")
       @consumer.consume
@@ -165,8 +165,8 @@ describe Consumer do
     end
 
     it "should encode an offset request" do
-      bytes = [Kafka::RequestType::OFFSETS].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [-2].pack("q").reverse + [Kafka::Consumer::MAX_OFFSETS].pack("N")
-      @consumer.encode_request(Kafka::RequestType::OFFSETS, "test", 0, -2, Kafka::Consumer::MAX_OFFSETS).should eql(bytes)
+      bytes = [Kafka::RequestType::OFFSETS].pack("n") + ["test".length].pack("n") + "test" + [0].pack("N") + [-1].pack("q").reverse + [Kafka::Consumer::MAX_OFFSETS].pack("N")
+      @consumer.encode_request(Kafka::RequestType::OFFSETS, "test", 0, -1, Kafka::Consumer::MAX_OFFSETS).should eql(bytes)
     end
 
     it "should parse an offsets response" do
