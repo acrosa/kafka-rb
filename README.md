@@ -1,6 +1,6 @@
 # kafka-rb
 kafka-rb allows you to produce and consume messages to / from the Kafka distributed messaging service.
-This is an improved version of the original Ruby client written by Alexandro Crosa, 
+This is an improved version of the original Ruby client written by Alejandro Crosa, 
 and is used in production at wooga.
 
 ## Requirements
@@ -62,4 +62,7 @@ You can obtain a copy and instructions on how to setup kafka at http://incubator
 
 
 ## Questions?
+alejandrocrosa at(@) gmail.com
+http://twitter.com/alejandrocrosa
+
 tim.lossen@wooga.net
