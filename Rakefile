@@ -20,7 +20,7 @@ require 'date'
 require 'rspec/core/rake_task'
 
 spec = Gem::Specification.new do |s|
-  s.name = %q{wooga-kafka-rb}
+  s.name = %q{kafka-rb}
   s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
