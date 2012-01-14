@@ -10,7 +10,7 @@ You can obtain a copy and instructions on how to setup kafka at http://incubator
 
 ## Installation
 
-    sudo gem install wooga-kafka-rb
+    sudo gem install kafka-rb
 
 (should work fine with JRuby, Ruby 1.8 and 1.9)
 
