@@ -21,6 +21,7 @@ module Kafka
   class Message
 
     MAGIC_IDENTIFIER_DEFAULT = 0
+    MESSAGE_HEADER_FORMAT = 'NCN'.freeze
 
     attr_accessor :magic, :checksum, :payload
 
@@ -39,11 +40,9 @@ module Kafka
     end
 
     def self.parse_from(binary)
-      size     = binary[0, 4].unpack("N").shift.to_i
-      magic    = binary[4, 1].unpack("C").shift
-      checksum = binary[5, 4].unpack("N").shift
+      size, magic, checksum = binary.unpack(MESSAGE_HEADER_FORMAT)
       payload  = binary[9, size] # 5 = 1 + 4 is Magic + Checksum
-      return Kafka::Message.new(payload, magic, checksum)
+      Kafka::Message.new(payload, magic, checksum)
     end
   end
 end
