@@ -36,7 +36,7 @@ module Kafka
     end
 
     def valid?
-      self.checksum == Zlib.crc32(self.payload)
+      self.checksum == calculate_checksum
     end
 
     def self.parse_from(binary)
