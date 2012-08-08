@@ -57,13 +57,29 @@ describe Message do
       @message.valid?.should eql(false)
     end
 
-    it "should parse a message from bytes" do
+    it "should parse a version-0 message from bytes" do
       bytes = [12].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
       message = Kafka::Message.parse_from(bytes)
       message.valid?.should eql(true)
       message.magic.should eql(0)
       message.checksum.should eql(1120192889)
       message.payload.should eql("ale")
+    end
+
+    it "should parse a version-1 message from bytes" do
+      bytes = [14, 1, 0, 755095536].pack('NCCN') + 'martin'
+      message = Kafka::Message.parse_from(bytes)
+      message.should be_valid
+      message.magic.should == 1
+      message.checksum.should == 755095536
+      message.payload.should == 'martin'
+    end
+
+    it "should raise an error if the magic number is not recognised" do
+      bytes = [14, 2, 0, 755095536].pack('NCCN') + 'martin' # 2 = some future format that's not yet invented
+      lambda {
+        Kafka::Message.parse_from(bytes)
+      }.should raise_error(RuntimeError, /Unsupported Kafka message version/)
     end
   end
 end
