@@ -25,7 +25,7 @@ describe Consumer do
   describe "Kafka Consumer" do
 
     it "should have a Kafka::RequestType::FETCH" do
-      Consumer::Kafka::RequestType::FETCH.should eql(1)
+      Kafka::RequestType::FETCH.should eql(1)
       @consumer.should respond_to(:request_type)
     end
 
