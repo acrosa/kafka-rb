@@ -49,8 +49,9 @@ module Kafka
     def consume
       self.offset ||= fetch_latest_offset
       send_consume_request
-      data = read_data_response
-      parse_message_set_from(data)
+      message_set = Kafka::Message.parse_from(read_data_response)
+      self.offset += message_set.size
+      message_set.messages
     rescue SocketError
       nil
     end
@@ -94,21 +95,5 @@ module Kafka
       max_size     = [max_size].pack("N")
       request_type + topic + partition + offset + max_size
     end
-
-    def parse_message_set_from(data)
-      messages = []
-      processed = 0
-      length = data.length - 4
-      while (processed <= length) do
-        message_size = data[processed, 4].unpack("N").shift + 4
-        message_data = data[processed, message_size]
-        break unless message_data.size == message_size
-        messages << Kafka::Message.parse_from(message_data)
-        processed += message_size
-      end
-      self.offset += processed
-      messages
-    end
-
   end
 end

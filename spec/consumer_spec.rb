@@ -91,39 +91,6 @@ describe Consumer do
       @consumer.send_consume_request.should eql(true)
     end
 
-    it "should parse a message set from bytes" do
-      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
-      message = @consumer.parse_message_set_from(bytes).first
-      message.payload.should eql("ale")
-      message.checksum.should eql(1120192889)
-      message.magic.should eql(0)
-      message.valid?.should eql(true)
-    end
-
-    it "should skip an incomplete message at the end of the response" do
-      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
-      # incomplete message
-      bytes += [8].pack("N")
-      messages = @consumer.parse_message_set_from(bytes)
-      messages.size.should eql(1)
-    end
-
-    it "should skip an incomplete message at the end of the response which has the same length as an empty message" do
-      bytes = [8].pack("N") + [0].pack("C") + [1120192889].pack("N") + "ale"
-      # incomplete message because payload is missing
-      bytes += [8].pack("N") + [0].pack("C") + [1120192889].pack("N")
-      messages = @consumer.parse_message_set_from(bytes)
-      messages.size.should eql(1)
-    end
-
-    it "should read empty messages correctly" do
-      # empty message
-      bytes = [5].pack("N") + [0].pack("C") + [0].pack("N") + ""
-      messages = @consumer.parse_message_set_from(bytes)
-      messages.size.should eql(1)
-      messages.first.payload.should eql("")
-    end
-
     it "should consume messages" do
       @consumer.should_receive(:send_consume_request).and_return(true)
       @consumer.should_receive(:read_data_response).and_return("")
