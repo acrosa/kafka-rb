@@ -65,11 +65,12 @@ describe Producer do
         message = Kafka::Message.new("ümlaut")
         encoded = @producer.encode(message)
         data = [encoded.size].pack("N") + encoded
+        message = Kafka::Message.parse_from(data).messages.first
         if RUBY_VERSION[0,3] == "1.8" # Use old iconv on Ruby 1.8 for encoding
           ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-          ic.iconv(Kafka::Message.parse_from(data).payload).should eql("ümlaut")
+          ic.iconv(message.payload).should eql("ümlaut")
         else
-          Kafka::Message.parse_from(data).payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
+          message.payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
         end
       end
     end
