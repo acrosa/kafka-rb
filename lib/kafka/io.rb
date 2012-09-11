@@ -16,6 +16,9 @@ module Kafka
   module IO
     attr_accessor :socket, :host, :port
 
+    HOST = "localhost"
+    PORT = 9092
+
     def connect(host, port)
       raise ArgumentError, "No host or port specified" unless host && port
       self.host = host

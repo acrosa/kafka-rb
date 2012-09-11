@@ -29,8 +29,8 @@ module Kafka
     def initialize(options = {})
       self.topic        = options[:topic]     || "test"
       self.partition    = options[:partition] || 0
-      self.host         = options[:host]      || "localhost"
-      self.port         = options[:port]      || 9092
+      self.host         = options[:host]      || HOST
+      self.port         = options[:port]      || PORT
       self.offset       = options[:offset]
       self.max_size     = options[:max_size]  || MAX_SIZE
       self.polling      = options[:polling]   || DEFAULT_POLLING_INTERVAL
