@@ -20,6 +20,7 @@ end
 
 require File.join(File.dirname(__FILE__), "kafka", "io")
 require File.join(File.dirname(__FILE__), "kafka", "request_type")
+require File.join(File.dirname(__FILE__), "kafka", "encoder")
 require File.join(File.dirname(__FILE__), "kafka", "error_codes")
 require File.join(File.dirname(__FILE__), "kafka", "batch")
 require File.join(File.dirname(__FILE__), "kafka", "message")
