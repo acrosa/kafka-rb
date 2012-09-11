@@ -12,23 +12,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-require 'socket'
-require 'zlib'
-if RUBY_VERSION[0,3] == "1.8"
-  require 'iconv'
-end
 
-require File.join(File.dirname(__FILE__), "kafka", "io")
-require File.join(File.dirname(__FILE__), "kafka", "request_type")
-require File.join(File.dirname(__FILE__), "kafka", "error_codes")
-require File.join(File.dirname(__FILE__), "kafka", "batch")
-require File.join(File.dirname(__FILE__), "kafka", "message")
-require File.join(File.dirname(__FILE__), "kafka", "producer")
-require File.join(File.dirname(__FILE__), "kafka", "producer_request")
-require File.join(File.dirname(__FILE__), "kafka", "consumer")
+require File.dirname(__FILE__) + '/spec_helper'
 
-module Kafka
+describe ProducerRequest do
+  let(:message) { Kafka::Message.new }
+  let(:req) { described_class.new("topic", message) }
 
-  class SocketError < RuntimeError; end
+  it "has a topic" do
+    req.topic = "topic"
+  end
 
+  it "has a set of messages" do
+    req.messages.should == [message]
+  end
+
+  it "has a default partition" do
+    req.partition.should == 0
+  end
+
+  it "can use a user-specified partition" do
+    req = described_class.new("topic", message, partition: 42)
+    req.partition.should == 42
+  end
 end
