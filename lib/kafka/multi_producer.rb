@@ -12,25 +12,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-require 'socket'
-require 'zlib'
-if RUBY_VERSION[0,3] == "1.8"
-  require 'iconv'
-end
-
-require File.join(File.dirname(__FILE__), "kafka", "io")
-require File.join(File.dirname(__FILE__), "kafka", "request_type")
-require File.join(File.dirname(__FILE__), "kafka", "encoder")
-require File.join(File.dirname(__FILE__), "kafka", "error_codes")
-require File.join(File.dirname(__FILE__), "kafka", "batch")
-require File.join(File.dirname(__FILE__), "kafka", "message")
-require File.join(File.dirname(__FILE__), "kafka", "multi_producer")
-require File.join(File.dirname(__FILE__), "kafka", "producer")
-require File.join(File.dirname(__FILE__), "kafka", "producer_request")
-require File.join(File.dirname(__FILE__), "kafka", "consumer")
-
 module Kafka
+  class MultiProducer
+    include Kafka::IO
 
-  class SocketError < RuntimeError; end
+    def initialize(options={})
+      self.host = options[:host] || HOST
+      self.port = options[:port] || PORT
+      self.connect(self.host, self.port)
+    end
 
+    def send(topic, messages, options={})
+      partition = options[:partition] || 0
+      self.write(Encoder.produce(topic, partition, messages))
+    end
+
+    def multi_send(producer_requests)
+      self.write(Encoder.multiproduce(producer_requests))
+    end
+  end
 end
