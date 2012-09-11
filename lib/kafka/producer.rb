@@ -17,8 +17,6 @@ module Kafka
 
     include Kafka::IO
 
-    PRODUCE_REQUEST_ID = Kafka::RequestType::PRODUCE
-
     attr_accessor :topic, :partition
 
     def initialize(options = {})
@@ -29,33 +27,8 @@ module Kafka
       self.connect(self.host, self.port)
     end
 
-    def encode(message)
-      if RUBY_VERSION[0,3] == "1.8"  # Use old iconv on Ruby 1.8 for encoding
-        ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-        [message.magic].pack("C") + [message.calculate_checksum].pack("N") + ic.iconv(message.payload.to_s)
-      else
-        [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s.force_encoding(Encoding::ASCII_8BIT)
-      end
-    end
-
-    def encode_request(topic, partition, messages)
-      message_set = Array(messages).collect { |message|
-        encoded_message = self.encode(message)
-        [encoded_message.length].pack("N") + encoded_message
-      }.join("")
-
-      request   = [PRODUCE_REQUEST_ID].pack("n")
-      topic     = [topic.length].pack("n") + topic
-      partition = [partition].pack("N")
-      messages  = [message_set.length].pack("N") + message_set
-
-      data = request + topic + partition + messages
-
-      return [data.length].pack("N") + data
-    end
-
     def send(messages)
-      self.write(self.encode_request(self.topic, self.partition, messages))
+      self.write(Encoder.produce(self.topic, self.partition, messages))
     end
 
     def batch(&block)

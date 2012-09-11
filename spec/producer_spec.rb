@@ -25,10 +25,6 @@ describe Producer do
   end
 
   describe "Kafka Producer" do
-    it "should have a PRODUCE_REQUEST_ID" do
-      Producer::PRODUCE_REQUEST_ID.should eql(0)
-    end
-
     it "should have a topic and a partition" do
       @producer.should respond_to(:topic)
       @producer.should respond_to(:partition)
@@ -46,61 +42,6 @@ describe Producer do
       @producer = Producer.new
       @producer.host.should eql("localhost")
       @producer.port.should eql(9092)
-    end
-
-    describe "Message Encoding" do
-      it "should encode a message" do
-        message = Kafka::Message.new("alejandro")
-        full_message = [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload
-        @producer.encode(message).should eql(full_message)
-      end
-      
-      it "should encode an empty message" do
-        message = Kafka::Message.new()
-        full_message = [message.magic].pack("C") + [message.calculate_checksum].pack("N") + message.payload.to_s
-        @producer.encode(message).should eql(full_message)
-      end
-
-      it "should encode strings containing non-ASCII characters" do
-        message = Kafka::Message.new("ümlaut")
-        encoded = @producer.encode(message)
-        data = [encoded.size].pack("N") + encoded
-        message = Kafka::Message.parse_from(data).messages.first
-        if RUBY_VERSION[0,3] == "1.8" # Use old iconv on Ruby 1.8 for encoding
-          ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-          ic.iconv(message.payload).should eql("ümlaut")
-        else
-          message.payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
-        end
-      end
-    end
-
-    describe "Request Encoding" do
-      it "should binary encode an empty request" do
-        bytes = @producer.encode_request("test", 0, [])
-        bytes.length.should eql(20)
-        bytes.should eql("\000\000\000\020\000\000\000\004test\000\000\000\000\000\000\000\000")
-      end
-
-      it "should binary encode a request with a message, using a specific wire format" do
-        message = Kafka::Message.new("ale")
-        bytes = @producer.encode_request("test", 3, message)
-        data_size  = bytes[0, 4].unpack("N").shift
-        request_id = bytes[4, 2].unpack("n").shift
-        topic_length = bytes[6, 2].unpack("n").shift
-        topic = bytes[8, 4]
-        partition = bytes[12, 4].unpack("N").shift
-        messages_length = bytes[16, 4].unpack("N").shift
-        messages = bytes[20, messages_length]
-
-        bytes.length.should eql(32)
-        data_size.should eql(28)
-        request_id.should eql(0)
-        topic_length.should eql(4)
-        topic.should eql("test")
-        partition.should eql(3)
-        messages_length.should eql(12)
-      end
     end
   end
 
