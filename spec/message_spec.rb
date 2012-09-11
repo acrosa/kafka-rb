@@ -40,6 +40,10 @@ describe Message do
       @message.magic.should eql(1)
     end
 
+    it "should have an empty payload by default" do
+      @message.payload.should == ""
+    end
+
     it "should calculate the checksum (crc32 of a given message)" do
       @message.payload = "ale"
       @message.calculate_checksum.should eql(1120192889)
