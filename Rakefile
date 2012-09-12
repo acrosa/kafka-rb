@@ -24,7 +24,7 @@ spec = Gem::Specification.new do |s|
   s.version = "0.0.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Alejandro Crosa", "Stefan Mees", "Tim Lossen"]
+  s.authors = ["Alejandro Crosa", "Stefan Mees", "Tim Lossen", "Liam Stewart"]
   s.autorequire = %q{kafka-rb}
   s.date = Time.now.strftime("%Y-%m-%d")
   s.description = %q{kafka-rb allows you to produce and consume messages using the Kafka distributed publish/subscribe messaging service.}
@@ -49,7 +49,7 @@ spec = Gem::Specification.new do |s|
   end
 end
 
-Rake::GemPackageTask.new(spec) do |pkg|
+Gem::PackageTask.new(spec) do |pkg|
   pkg.gem_spec = spec
 end
 
