@@ -42,7 +42,7 @@ module Kafka
 
     def initialize(payload = nil, magic = MAGIC_IDENTIFIER_DEFAULT, checksum = nil)
       self.magic    = magic
-      self.payload  = payload
+      self.payload  = payload || ""
       self.checksum = checksum || self.calculate_checksum
     end
 
