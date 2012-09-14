@@ -7,6 +7,11 @@ and is used in production at wooga.
 You need to have access to your Kafka instance and be able to connect through TCP. 
 You can obtain a copy and instructions on how to setup kafka at http://incubator.apache.org/kafka/
 
+To make Snappy compression available, add
+
+    gem "snappy", "0.0.4", :git => "git://github.com/watersofoblivion/snappy.git", :branch => "snappy-streaming"
+
+to your Gemfile.
 
 ## Installation
 

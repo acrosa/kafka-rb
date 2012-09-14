@@ -14,7 +14,7 @@
 # limitations under the License.
 module Kafka
   module IO
-    attr_accessor :socket, :host, :port
+    attr_accessor :socket, :host, :port, :compression
 
     HOST = "localhost"
     PORT = 9092

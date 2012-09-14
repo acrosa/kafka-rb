@@ -20,15 +20,16 @@ module Kafka
     attr_accessor :topic, :partition
 
     def initialize(options = {})
-      self.topic     = options[:topic]      || "test"
-      self.partition = options[:partition]  || 0
-      self.host      = options[:host]       || HOST
-      self.port      = options[:port]       || PORT
+      self.topic       = options[:topic]      || "test"
+      self.partition   = options[:partition]  || 0
+      self.host        = options[:host]       || HOST
+      self.port        = options[:port]       || PORT
+      self.compression = options[:compression] || Message::NO_COMPRESSION
       self.connect(self.host, self.port)
     end
 
     def send(messages)
-      self.write(Encoder.produce(self.topic, self.partition, messages))
+      self.write(Encoder.produce(self.topic, self.partition, messages, compression))
     end
 
     def batch(&block)

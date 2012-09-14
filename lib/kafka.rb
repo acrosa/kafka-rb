@@ -14,8 +14,12 @@
 # limitations under the License.
 require 'socket'
 require 'zlib'
-if RUBY_VERSION[0,3] == "1.8"
-  require 'iconv'
+require "stringio"
+
+begin
+  require 'snappy'
+rescue LoadError
+  nil
 end
 
 require File.join(File.dirname(__FILE__), "kafka", "io")

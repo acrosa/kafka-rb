@@ -32,7 +32,7 @@ describe ProducerRequest do
   end
 
   it "can use a user-specified partition" do
-    req = described_class.new("topic", message, partition: 42)
+    req = described_class.new("topic", message, :partition => 42)
     req.partition.should == 42
   end
 end

@@ -15,22 +15,12 @@
 
 module Kafka
   module Encoder
-    def self.message(message)
-      payload = \
-        if RUBY_VERSION[0,3] == "1.8"  # Use old iconv on Ruby 1.8 for encoding
-          Iconv.new('UTF-8//IGNORE', 'UTF-8').iconv(message.payload.to_s)
-        else
-          message.payload.to_s.force_encoding(Encoding::ASCII_8BIT)
-        end
-      data = [message.magic].pack("C") + [message.calculate_checksum].pack("N") + payload
-
-      [data.length].pack("N") + data
+    def self.message(message, compression = Message::NO_COMPRESSION)
+      message.encode(compression)
     end
 
-    def self.message_block(topic, partition, messages)
-      message_set = Array(messages).collect { |message|
-        self.message(message)
-      }.join("")
+    def self.message_block(topic, partition, messages, compression)
+      message_set = message_set(messages, compression)
 
       topic     = [topic.length].pack("n") + topic
       partition = [partition].pack("N")
@@ -39,16 +29,24 @@ module Kafka
       return topic + partition + messages
     end
 
-    def self.produce(topic, partition, messages)
+    def self.message_set(messages, compression)
+      message_set = Array(messages).collect { |message|
+        self.message(message)
+      }.join("")
+      message_set = self.message(Message.new(message_set), compression) unless compression == Message::NO_COMPRESSION
+      message_set
+    end
+
+    def self.produce(topic, partition, messages, compression = Message::NO_COMPRESSION)
       request = [RequestType::PRODUCE].pack("n")
-      data = request + self.message_block(topic, partition, messages)
+      data = request + self.message_block(topic, partition, messages, compression)
 
       return [data.length].pack("N") + data
     end
 
-    def self.multiproduce(producer_requests)
+    def self.multiproduce(producer_requests, compression = Message::NO_COMPRESSION)
       part_set = Array(producer_requests).map { |req|
-        self.message_block(req.topic, req.partition, req.messages)
+        self.message_block(req.topic, req.partition, req.messages, compression)
       }
 
       request = [RequestType::MULTIPRODUCE].pack("n")
