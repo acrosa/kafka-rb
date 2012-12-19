@@ -30,6 +30,12 @@ describe Producer do
       @producer.should respond_to(:partition)
     end
 
+    it "should have compression" do
+      @producer.should respond_to :compression
+      Producer.new(:compression => 1).compression.should == 1
+      Producer.new.compression.should == 0
+    end
+
     it "should set a topic and partition on initialize" do
       @producer = Producer.new({ :host => "localhost", :port => 9092, :topic => "testing" })
       @producer.topic.should eql("testing")

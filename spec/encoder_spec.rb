@@ -39,10 +39,71 @@ describe Encoder do
       encoded = described_class.message(message)
       message = Kafka::Message.parse_from(encoded).messages.first
       if RUBY_VERSION[0,3] == "1.8" # Use old iconv on Ruby 1.8 for encoding
-        ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
-        ic.iconv(message.payload).should eql("ümlaut")
+        #ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+        #ic.iconv(message.payload).should eql("ümlaut")
+        message.payload.should eql("ümlaut")
       else
         message.payload.force_encoding(Encoding::UTF_8).should eql("ümlaut")
+      end
+    end
+
+    it "should encode strings containing non-ASCII characters" do
+      message = Kafka::Message.new("\214")
+      encoded = described_class.message(message)
+      message = Kafka::Message.parse_from(encoded).messages.first
+      if RUBY_VERSION[0,3] == "1.8"
+        message.payload.should eql("\214")
+      else
+        message.payload.force_encoding(Encoding::UTF_8).should eql("\214")
+      end
+    end
+  end
+
+  describe :compression do
+    before do
+      @message = Kafka::Message.new "foo"
+    end
+
+    it "should default to no compression" do
+      msg = "foo"
+      checksum = Zlib.crc32 msg
+      magic = 0
+      msg_size = 5 + msg.size
+      raw = [msg_size, magic, checksum, msg].pack "NCNa#{msg.size}"
+
+      Encoder.message(@message).should == raw
+    end
+
+    it "should support GZip compression" do
+      buffer = StringIO.new
+      gz = Zlib::GzipWriter.new buffer, nil, nil
+      gz.write "foo"
+      gz.close
+      buffer.rewind
+      msg = buffer.string
+      checksum = Zlib.crc32 msg
+      magic = 1
+      attrs = 1
+      msg_size = 6 + msg.size
+      raw = [msg_size, magic, attrs, checksum, msg].pack "NCCNa#{msg.size}"
+      Encoder.message(@message, 1).should == raw
+    end
+
+    if Object.const_defined? "Snappy"
+      it "should support Snappy compression" do
+        buffer = StringIO.new
+        Snappy::Writer.new buffer do |w|
+          w << "foo"
+        end
+        buffer.rewind
+        msg = buffer.string
+        checksum = Zlib.crc32 msg
+        magic = 1
+        attrs = 2
+        msg_size = 6 + msg.size
+        raw = [msg_size, magic, attrs, checksum, msg].pack "NCCNa#{msg.size}"
+
+        Encoder.message(@message, 2).should == raw
       end
     end
   end
@@ -72,6 +133,23 @@ describe Encoder do
       topic.should eql("test")
       partition.should eql(3)
       messages_length.should eql(12)
+    end
+  end
+
+  describe "message_set" do
+    it "should compress messages into a message set" do
+      message_one = Kafka::Message.new "foo"
+      message_two = Kafka::Message.new "bar"
+      bytes = described_class.message_set [message_one, message_two], Kafka::Message::GZIP_COMPRESSION
+
+      messages = Kafka::Message.parse_from bytes
+      messages.should be_a Kafka::Message::MessageSet
+      messages.messages.size.should == 2
+
+      messages.messages[0].should be_a Kafka::Message
+      messages.messages[0].payload.should == "foo"
+      messages.messages[1].should be_a Kafka::Message
+      messages.messages[1].payload.should == "bar"
     end
   end
 
@@ -135,7 +213,7 @@ describe Encoder do
       messages = [Kafka::Message.new("ale"), Kafka::Message.new("beer")]
       bytes = described_class.multiproduce([
           Kafka::ProducerRequest.new("test", messages[0]),
-          Kafka::ProducerRequest.new("topic", messages[1], partition: 1),
+          Kafka::ProducerRequest.new("topic", messages[1], :partition => 1),
         ])
 
       req_length = bytes[0, 4].unpack("N").shift

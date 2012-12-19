@@ -19,16 +19,17 @@ module Kafka
     def initialize(options={})
       self.host = options[:host] || HOST
       self.port = options[:port] || PORT
+      self.compression = options[:compression] || Message::NO_COMPRESSION
       self.connect(self.host, self.port)
     end
 
     def send(topic, messages, options={})
       partition = options[:partition] || 0
-      self.write(Encoder.produce(topic, partition, messages))
+      self.write(Encoder.produce(topic, partition, messages, compression))
     end
 
     def multi_send(producer_requests)
-      self.write(Encoder.multiproduce(producer_requests))
+      self.write(Encoder.multiproduce(producer_requests, compression))
     end
   end
 end
