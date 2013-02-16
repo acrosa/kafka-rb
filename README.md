@@ -66,6 +66,56 @@ to your Gemfile.
     end
 
 
+### Using the cli
+
+There is two cli programs to communicate with kafka from the command line
+interface mainly intended for debug.  `kafka-publish` and `kafka-consumer`. You
+can configure the commands by command line arguments or by setting the
+environment variables: *KAFKA_HOST*, *KAFKA_PORT*, *KAFKA_TOPIC*,
+*KAFKA_COMPRESSION*.
+
+
+
+#### kafka-publish
+
+```
+$ kafka-publish --help
+Usage: kafka-publish [options]
+
+    -h, --host HOST                  Set the kafka hostname
+    -p, --port PORT                  Set the kafka port
+    -t, --topic TOPIC                Set the kafka topic
+    -c, --compression no|gzip|snappy Set the compression method
+    -m, --message MESSAGE            Message to send
+```
+
+If _message_ is omitted, `kafka-publish` will read from *STDIN*, until EOF or
+SIG-INT.
+
+NOTE: kafka-publish doesn't bach messages for the moment.
+
+This could be quiet handy for piping directly to kafka:
+
+```
+$ tail -f /var/log/syslog | kafka-publish -t syslog
+```
+
+#### kafka-consumer
+
+```
+$ kafka-consumer --help
+Usage: kafka-consumer [options]
+
+    -h, --host HOST                  Set the kafka hostname
+    -p, --port PORT                  Set the kafka port
+    -t, --topic TOPIC                Set the kafka topic
+```
+
+Kafka consumer will loop and wait for messages until it is interrupted.
+
+This could be nice for example to have a sample of messages.
+
+
 ## Questions?
 alejandrocrosa at(@) gmail.com
 http://twitter.com/alejandrocrosa

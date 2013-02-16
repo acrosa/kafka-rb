@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'kafka'
+require 'kafka/cli'
+
+Kafka::CLI.publish!
