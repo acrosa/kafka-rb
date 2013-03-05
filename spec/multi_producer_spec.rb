@@ -38,7 +38,7 @@ describe MultiProducer do
       encoded = Kafka::Encoder.produce("test", 0, message)
 
       subject.should_receive(:write).with(encoded).and_return(encoded.length)
-      subject.send("test", message, :partition => 0).should == encoded.length
+      subject.push("test", message, :partition => 0).should == encoded.length
     end
 
     it "sends multiple messages" do
@@ -50,7 +50,7 @@ describe MultiProducer do
       encoded = Encoder.multiproduce(reqs)
 
       subject.should_receive(:write).with(encoded).and_return(encoded.length)
-      subject.multi_send(reqs).should == encoded.length
+      subject.multi_push(reqs).should == encoded.length
     end
 
     it "should compress messages" do
@@ -60,7 +60,7 @@ describe MultiProducer do
 
       encoded = Encoder.produce("test", 0, messages[0])
       Encoder.should_receive(:produce).with("test", 0, messages[0], subject.compression).and_return encoded
-      subject.send("test", messages[0], :partition => 0)
+      subject.push("test", messages[0], :partition => 0)
 
       reqs = [
           Kafka::ProducerRequest.new("topic", messages[0]),
@@ -68,7 +68,7 @@ describe MultiProducer do
       ]
       encoded = Encoder.multiproduce(reqs)
       Encoder.should_receive(:multiproduce).with(reqs, subject.compression)
-      subject.multi_send(reqs)
+      subject.multi_push(reqs)
     end
   end
 end

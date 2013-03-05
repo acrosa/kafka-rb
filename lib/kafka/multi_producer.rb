@@ -23,12 +23,12 @@ module Kafka
       self.connect(self.host, self.port)
     end
 
-    def send(topic, messages, options={})
+    def push(topic, messages, options={})
       partition = options[:partition] || 0
       self.write(Encoder.produce(topic, partition, messages, compression))
     end
 
-    def multi_send(producer_requests)
+    def multi_push(producer_requests)
       self.write(Encoder.multiproduce(producer_requests, compression))
     end
   end
