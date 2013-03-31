@@ -28,14 +28,14 @@ module Kafka
       self.connect(self.host, self.port)
     end
 
-    def send(messages)
+    def push(messages)
       self.write(Encoder.produce(self.topic, self.partition, messages, compression))
     end
 
     def batch(&block)
       batch = Kafka::Batch.new
       block.call( batch )
-      self.send(batch.messages)
+      push(batch.messages)
       batch.messages.clear
     end
   end
