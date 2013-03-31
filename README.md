@@ -27,7 +27,7 @@ to your Gemfile.
     require 'kafka'
     producer = Kafka::Producer.new
     message = Kafka::Message.new("some random message content")
-    producer.send(message)
+    producer.push(message)
 
 ### Sending a sequence of messages
 
@@ -35,16 +35,16 @@ to your Gemfile.
     producer = Kafka::Producer.new
     message1 = Kafka::Message.new("some random message content")
     message2 = Kafka::Message.new("some more content")
-    producer.send([message1, message2])
+    producer.push([message1, message2])
 
 ### Batching a bunch of messages using the block syntax
 
     require 'kafka'
     producer = Kafka::Producer.new
     producer.batch do |messages|
-        puts "Batching a send of multiple messages.."
-        messages << Kafka::Message.new("first message to send")
-        messages << Kafka::Message.new("second message to send")
+        puts "Batching a push of multiple messages.."
+        messages << Kafka::Message.new("first message to push")
+        messages << Kafka::Message.new("second message to push")
     end
 
 * they will be sent all at once, after the block execution

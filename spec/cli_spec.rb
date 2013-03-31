@@ -127,7 +127,7 @@ describe CLI do
     CLI.string_to_compression("no").should == Message::NO_COMPRESSION
     CLI.string_to_compression("gzip").should == Message::GZIP_COMPRESSION
     CLI.string_to_compression("snappy").should == Message::SNAPPY_COMPRESSION
-    lambda { CLI.send(:string_to_compression,nil) }.should raise_error
+    lambda { CLI.push(:string_to_compression,nil) }.should raise_error
   end
 
 end

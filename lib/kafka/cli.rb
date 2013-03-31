@@ -24,7 +24,7 @@ module Kafka
       parse_args
       validate_config
       if config[:message]
-        send(config, config.delete(:message))
+        push(config, config.delete(:message))
       else
         publish(config)
       end
@@ -129,8 +129,8 @@ module Kafka
       end
     end
 
-    def send(options, message)
-      Producer.new(options).send(Message.new(message))
+    def push(options, message)
+      Producer.new(options).push(Message.new(message))
     end
 
     def publish(options)
@@ -143,7 +143,7 @@ module Kafka
 
     def publish_loop(producer)
       message = read_input
-      producer.send(Message.new(message))
+      producer.push(Message.new(message))
     end
 
     def read_input
