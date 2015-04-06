@@ -9,7 +9,7 @@ You can obtain a copy and instructions on how to setup kafka at http://incubator
 
 To make Snappy compression available, add
 
-    gem "snappy", "0.0.4", :git => "git://github.com/watersofoblivion/snappy.git", :branch => "snappy-streaming"
+    gem "snappy"
 
 to your Gemfile.
 
