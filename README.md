@@ -110,13 +110,16 @@ to your Gemfile.
     
     puts "Master listener started..."
     
-    threads = []
-    15.times do | p |
-      threads[p] = Thread.new{ listen(p) }
+    # listen to 16 partitions on kafka 
+    # (be sure to configure to size of your kafka cluster)
+    subscribers = []
+    15.times do | partition_index |
+      subscribers[p] = Thread.new{ subscribe(partition_index) }
     end
     
-    threads.each do | t |
-      t.join
+    # endless loop pulling messages
+    subscribers.each do | sub |
+      sub.join
     end
 
 ### Using the cli
