@@ -3,6 +3,12 @@ kafka-rb allows you to produce and consume messages to / from the Kafka distribu
 This is an improved version of the original Ruby client written by Alejandro Crosa, 
 and is used in production at wooga.
 
+## Ubuntu Pre-install
+
+    apt-get install build-essential gcc g++ liblzo2-dev
+    apt-get install ruby1.9.1-dev
+    apt-get install libsnappy1 libsnappy-dev
+
 ## Requirements
 You need to have access to your Kafka instance and be able to connect through TCP. 
 You can obtain a copy and instructions on how to setup kafka at http://incubator.apache.org/kafka/
@@ -18,12 +24,6 @@ to your Gemfile.
     sudo gem install kafka-rb
 
 (should work fine with JRuby, Ruby 1.8 and 1.9)
-
-## Ubuntu Pre Install
-
-    apt-get install build-essential gcc g++ liblzo2-dev
-    apt-get install ruby1.9.1-dev
-    apt-get install libsnappy1 libsnappy-dev
 
 ## Usage
 
