@@ -64,7 +64,60 @@ to your Gemfile.
         puts "Received"
         puts messages
     end
+    
+## More real world example using partitions as well as reading avro
 
+    #!/usr/bin/env ruby
+    require 'kafka'
+    require 'snappy'
+    require 'avro'
+    require 'json'
+    
+    # avro schema readers
+    @schema = Avro::Schema.parse(File.open("events.avsc", "rb").read)
+    @reader = Avro::IO::DatumReader.new(@schema)
+    
+    # converts bits to well defined avro object
+    def to_event (bits)
+        blob = StringIO.new(bits)
+        decoder = Avro::IO::BinaryDecoder.new(blob)
+        obj = @reader.read(decoder)
+        puts obj.to_json
+    end
+    
+    # define listener for each partition you have
+    def subscribe (partition=0)
+            trap(:INT) { exit }
+            puts "polling partition #{partition}..."
+            consumer = Kafka::Consumer.new({
+                    :host => "YOUR_KAFKA_SERVER_HERE",
+                    :port => 9092,
+                    :topic => "events",
+                    :max_size => 1024 * 1024 * 10,
+                    :polling => 1,
+                    :partition => partition })
+            begin
+                    consumer.loop do |messages|
+                        puts "polling #{partition} partition..."
+                        messages.each do |message|
+                          to_event message.payload
+                        end
+                    end
+            rescue
+                    puts "Whoops, critical error #{$!} on partition #{partition}!!!"
+            end
+    end
+    
+    puts "Master listener started..."
+    
+    threads = []
+    15.times do | p |
+      threads[p] = Thread.new{ listen(p) }
+    end
+    
+    threads.each do | t |
+      t.join
+    end
 
 ### Using the cli
 
