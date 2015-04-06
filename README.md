@@ -19,6 +19,11 @@ to your Gemfile.
 
 (should work fine with JRuby, Ruby 1.8 and 1.9)
 
+## Ubuntu Pre Install
+
+    apt-get install build-essential gcc g++ liblzo2-dev
+    apt-get install ruby1.9.1-dev
+    apt-get install libsnappy1 libsnappy-dev
 
 ## Usage
 
