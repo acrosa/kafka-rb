@@ -100,7 +100,6 @@ module Kafka
             ensure_snappy! do
               uncompressed = Snappy::Reader.new(StringIO.new(payload)).read
               message_set = parse_from(uncompressed)
-              raise 'malformed compressed message' if message_set.size != uncompressed.size
               messages.concat(message_set.messages)
             end
           else

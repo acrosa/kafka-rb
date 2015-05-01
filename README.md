@@ -3,13 +3,19 @@ kafka-rb allows you to produce and consume messages to / from the Kafka distribu
 This is an improved version of the original Ruby client written by Alejandro Crosa, 
 and is used in production at wooga.
 
+## Ubuntu Pre-install
+
+    apt-get install build-essential gcc g++ liblzo2-dev
+    apt-get install ruby1.9.1-dev
+    apt-get install libsnappy1 libsnappy-dev
+
 ## Requirements
 You need to have access to your Kafka instance and be able to connect through TCP. 
 You can obtain a copy and instructions on how to setup kafka at http://incubator.apache.org/kafka/
 
 To make Snappy compression available, add
 
-    gem "snappy", "0.0.4", :git => "git://github.com/watersofoblivion/snappy.git", :branch => "snappy-streaming"
+    gem "snappy"
 
 to your Gemfile.
 
@@ -18,7 +24,6 @@ to your Gemfile.
     sudo gem install kafka-rb
 
 (should work fine with JRuby, Ruby 1.8 and 1.9)
-
 
 ## Usage
 
@@ -64,7 +69,63 @@ to your Gemfile.
         puts "Received"
         puts messages
     end
+    
+## More real world example using partitions as well as reading avro
 
+    #!/usr/bin/env ruby
+    require 'kafka'
+    require 'snappy'
+    require 'avro'
+    require 'json'
+    
+    # avro schema readers
+    @schema = Avro::Schema.parse(File.open("events.avsc", "rb").read)
+    @reader = Avro::IO::DatumReader.new(@schema)
+    
+    # converts bits to well defined avro object
+    def to_event (bits)
+        blob = StringIO.new(bits)
+        decoder = Avro::IO::BinaryDecoder.new(blob)
+        obj = @reader.read(decoder)
+        puts obj.to_json
+    end
+    
+    # define listener for each partition you have
+    def subscribe (partition=0)
+            trap(:INT) { exit }
+            puts "polling partition #{partition}..."
+            consumer = Kafka::Consumer.new({
+                    :host => "YOUR_KAFKA_SERVER_HERE",
+                    :port => 9092,
+                    :topic => "events",
+                    :max_size => 1024 * 1024 * 10,
+                    :polling => 1,
+                    :partition => partition })
+            begin
+                    consumer.loop do |messages|
+                        puts "polling #{partition} partition..."
+                        messages.each do |message|
+                          to_event message.payload
+                        end
+                    end
+            rescue
+                    puts "Whoops, critical error #{$!} on partition #{partition}!!!"
+            end
+    end
+    
+    puts "Master listener started..."
+    
+    # listen to 16 partitions on kafka 
+    # (be sure to configure to size of your kafka cluster)
+    subscribers = []
+    15.times do | partition_index |
+      subscribers[p] = Thread.new{ subscribe(partition_index) }
+    end
+    
+    # endless loop pulling messages
+    subscribers.each do | sub |
+      sub.join
+    end
 
 ### Using the cli
 
